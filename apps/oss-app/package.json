@@ -1,0 +1,27 @@
+{
+    "name": "@flowise/oss-app",
+    "version": "3.0.12",
+    "description": "Flowise Open Source Edition - Application Entry Point",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "ts-node src/index.ts",
+        "start": "node dist/index.js",
+        "clean": "rimraf dist",
+        "watch": "tsc --watch"
+    },
+    "dependencies": {
+        "@flowise/domain-core": "workspace:^",
+        "@flowise-legacy/server": "workspace:^"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "rimraf": "^5.0.5",
+        "ts-node": "^10.7.0",
+        "typescript": "^5.4.5"
+    },
+    "engines": {
+        "node": ">=18.15.0 <19.0.0 || ^20"
+    }
+}

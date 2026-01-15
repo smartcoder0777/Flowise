@@ -383,15 +383,67 @@ export class App {
 
 let serverApp: App | undefined
 
-export async function start(): Promise<void> {
+/**
+ * Start the Flowise server application.
+ *
+ * This function initializes the database and starts the server.
+ * For app layer orchestration, use initializeApp() and startServer() separately.
+ *
+ * @param options - Optional configuration
+ * @param options.skipInit - If true, skips initialization (assumes already done by app layer)
+ */
+export async function start(options?: { skipInit?: boolean }): Promise<void> {
     serverApp = new App()
 
     const host = process.env.HOST
     const port = parseInt(process.env.PORT || '', 10) || 3000
     const server = http.createServer(serverApp.app)
 
-    await serverApp.initDatabase()
+    // Initialize database and services if not already done by app layer
+    if (!options?.skipInit) {
+        await serverApp.initDatabase()
+    }
+
+    // Configure the Express app (always needed)
     await serverApp.config()
+
+    server.listen(port, host, () => {
+        logger.info(`⚡️ [server]: Flowise Server is listening at ${host ? 'http://' + host : ''}:${port}`)
+    })
+}
+
+/**
+ * Initialize the Flowise application (database, services, etc.)
+ * This is exposed for app layer orchestration.
+ *
+ * @returns The initialized App instance
+ */
+export async function initializeApp(): Promise<App> {
+    if (!serverApp) {
+        serverApp = new App()
+    }
+    await serverApp.initDatabase()
+    return serverApp
+}
+
+/**
+ * Start the HTTP server (assumes app is already initialized).
+ * This is exposed for app layer orchestration.
+ *
+ * @param app - Optional App instance (uses global instance if not provided)
+ */
+export async function startServer(app?: App): Promise<void> {
+    const appInstance = app || serverApp
+    if (!appInstance) {
+        throw new Error('App must be initialized before starting server. Call initializeApp() first.')
+    }
+
+    const host = process.env.HOST
+    const port = parseInt(process.env.PORT || '', 10) || 3000
+    const server = http.createServer(appInstance.app)
+
+    // Configure the Express app (always needed)
+    await appInstance.config()
 
     server.listen(port, host, () => {
         logger.info(`⚡️ [server]: Flowise Server is listening at ${host ? 'http://' + host : ''}:${port}`)
